@@ -5,13 +5,15 @@ const app = express();
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 require('dotenv').config();
+const jwt = require('jsonwebtoken');
+const auth = require('./utils/auth');
 const connectDB = require('./utils/database');
 const { ItemModel, UserModel } = require('./utils/schemaModels');
 const { connect } = require('mongoose');
 
 // ITEM functions
 // Create Item
-app.post('/item/create', async (req, res) => {
+app.post('/item/create', auth, async (req, res) => {
   try {
     await connectDB();
     console.log(req.body);
@@ -57,11 +59,16 @@ app.get('/item/:id', async (req, res) => {
 });
 
 // Update Item
-app.put('/item/update/:id', async (req, res) => {
+app.put('/item/update/:id', auth, async (req, res) => {
   try {
     await connectDB();
     const id = req.params.id;
     const updateData = req.body;
+    const singleItem = await ItemModel.findById(id);
+    const email = req.body.email;
+    if (singleItem.email !== email) {
+      throw new Error();
+    }
     await ItemModel.updateOne({ _id: id }, updateData);
     return res.status(200).json({ message: 'アイテム編集成功' });
   } catch (error) {
@@ -71,10 +78,15 @@ app.put('/item/update/:id', async (req, res) => {
 });
 
 // Delete Item
-app.delete('/item/delete/:id', async (req, res) => {
+app.delete('/item/delete/:id', auth, async (req, res) => {
   try {
     await connectDB();
     const id = req.params.id;
+    const singleItem = await ItemModel.findById(id);
+    const email = req.body.email;
+    if (singleItem.email !== email) {
+      throw new Error();
+    }
     await ItemModel.deleteOne({ _id: id });
     return res.status(200).json({ message: 'アイテム削除成功' });
   } catch (error) {
@@ -98,6 +110,8 @@ app.post('/user/register', async (req, res) => {
 });
 
 // Login User
+const secret_key = process.env.JWT_SECRET_KEY;
+
 app.post('/user/login', async (req, res) => {
   try {
     await connectDB();
@@ -114,7 +128,12 @@ app.post('/user/login', async (req, res) => {
         .status(400)
         .json({ message: 'ログイン失敗：パスワードが間違っています' });
     }
-    return res.status(200).json({ message: 'ログイン成功' });
+    const payload = {
+      email: email,
+    };
+    const token = jwt.sign(payload, secret_key, { expiresIn: '23h' });
+    console.log(token);
+    return res.status(200).json({ message: 'ログイン成功', token: token });
   } catch (error) {
     console.log(error);
     return res.status(400).json({ message: 'ログイン失敗' });
