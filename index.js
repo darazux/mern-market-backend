@@ -2,8 +2,8 @@
 
 const express = require('express');
 const app = express();
-
-const PORT = process.env.PORT || 5000;
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 
 app.get('/', (req, res) => {
   return res.status(200).json('hello');
@@ -11,6 +11,11 @@ app.get('/', (req, res) => {
 
 // ITEM functions
 // Create Item
+app.get('/item/create', (req, res) => {
+  console.log(req.body.title);
+  return res.status(200).json('hi');
+});
+
 // Read All Items
 // Read Single Item
 // Update Item
@@ -19,6 +24,8 @@ app.get('/', (req, res) => {
 // USER functions
 // Register User
 // Login User
+
+const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
   console.log(`Listening on localhost port ${PORT}`);
