@@ -10,7 +10,7 @@ const { ItemModel } = require('./utils/schemaModels');
 
 // ITEM functions
 // Create Item
-app.get('/item/create', async (req, res) => {
+app.post('/item/create', async (req, res) => {
   try {
     await connectDB();
     console.log(req.body);
