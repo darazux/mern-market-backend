@@ -54,8 +54,33 @@ app.get('/item/:id', async (req, res) => {
       .json({ message: 'アイテム読み取り失敗（シングル）' });
   }
 });
+
 // Update Item
+app.put('/item/update/:id', async (req, res) => {
+  try {
+    await connectDB();
+    const id = req.params.id;
+    const updateData = req.body;
+    await ItemModel.updateOne({ _id: id }, updateData);
+    return res.status(200).json({ message: 'アイテム編集成功' });
+  } catch (error) {
+    console.log(error);
+    return res.status(400).json({ message: 'アイテム編集失敗' });
+  }
+});
+
 // Delete Item
+app.delete('/item/delete/:id', async (req, res) => {
+  try {
+    await connectDB();
+    const id = req.params.id;
+    await ItemModel.deleteOne({ _id: id });
+    return res.status(200).json({ message: 'アイテム削除成功' });
+  } catch (error) {
+    console.log(error);
+    return res.status(400).json({ message: 'アイテム削除失敗' });
+  }
+});
 
 // USER functions
 // Register User
