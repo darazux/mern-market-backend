@@ -98,6 +98,28 @@ app.post('/user/register', async (req, res) => {
 });
 
 // Login User
+app.post('/user/login', async (req, res) => {
+  try {
+    await connectDB();
+    const email = req.body.email;
+    const savedUserInfo = await UserModel.findOne({ email: email });
+    if (!savedUserInfo) {
+      return res
+        .status(400)
+        .json({ message: 'ログイン失敗：ユーザー登録をしてください' });
+    }
+    const password = req.body.password;
+    if (password !== savedUserInfo.password) {
+      return res
+        .status(400)
+        .json({ message: 'ログイン失敗：パスワードが間違っています' });
+    }
+    return res.status(200).json({ message: 'ログイン成功' });
+  } catch (error) {
+    console.log(error);
+    return res.status(400).json({ message: 'ログイン失敗' });
+  }
+});
 
 const PORT = process.env.PORT || 5000;
 
